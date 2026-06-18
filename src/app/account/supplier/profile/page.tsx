@@ -7,7 +7,7 @@ import { CATEGORIES } from "@/lib/constants";
 
 export default function SupplierProfilePage() {
   const { user } = useAuth();
-  const supabase = useMemo(() => createClient(), []);
+  const supabase = useMemo(() => createClient()!, []);
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);

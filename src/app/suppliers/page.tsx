@@ -22,7 +22,7 @@ interface SupplierRow {
 }
 
 export default function SuppliersPage() {
-  const supabase = useMemo(() => createClient(), []);
+  const supabase = useMemo(() => createClient()!, []);
   const [suppliers, setSuppliers] = useState<SupplierRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");

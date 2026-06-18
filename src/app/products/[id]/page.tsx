@@ -24,7 +24,7 @@ export default function ProductDetailPage() {
     const loadProduct = async () => {
       setLoading(true);
       try {
-        const supabase = createClient();
+        const supabase = createClient()!;
         const { data } = await supabase
           .from("product_listings")
           .select("*")

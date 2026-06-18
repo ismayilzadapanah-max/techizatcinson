@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth-context";
 
 export default function SupplierContactPage() {
   const { user } = useAuth();
-  const supabase = useMemo(() => createClient(), []);
+  const supabase = useMemo(() => createClient()!, []);
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);

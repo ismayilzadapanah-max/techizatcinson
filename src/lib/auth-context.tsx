@@ -1,23 +1,9 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import { createClient } from "@/lib/supabase/client";
 import type { User, UserRole } from "@/lib/types";
-import type { User as SupabaseUser, AuthChangeEvent, Session } from "@supabase/supabase-js";
-
-let supabaseClient: ReturnType<typeof import("@/lib/supabase/client").createClient> | null = null;
-
-const getSupabaseClient = async () => {
-  if (!supabaseClient) {
-    try {
-      const { createClient } = await import("@/lib/supabase/client");
-      supabaseClient = createClient();
-    } catch (error) {
-      console.error("Failed to initialize Supabase client:", error);
-      return null;
-    }
-  }
-  return supabaseClient;
-};
+import type { User as SupabaseUser, AuthChangeEvent, Session, SupabaseClient } from "@supabase/supabase-js";
 
 interface AuthContextType {
   user: User | null;
@@ -39,24 +25,18 @@ const AuthContext = createContext<AuthContextType>({
   logout: async () => {},
 });
 
-// Supabase xəta mesajlarını Azərbaycan dilinə tərcümə
 function translateError(message: string): string {
   const lower = message.toLowerCase();
-  if (lower.includes("rate limit") || lower.includes("rate_limit")) {
-    return "Həddən artıq çox cəhd. Zəhmət olmasa bir neçə dəqiqə gözləyin və yenidən yoxlayın.";
-  }
-  if (lower.includes("invalid login credentials") || lower.includes("invalid email or password")) {
+  if (lower.includes("rate limit") || lower.includes("rate_limit"))
+    return "Həddən artıq çox cəhd. Zəhmət olmasa bir neçə dəqiqə gözləyin.";
+  if (lower.includes("invalid login credentials") || lower.includes("invalid email or password"))
     return "E-poçt və ya şifrə yanlışdır.";
-  }
-  if (lower.includes("user already registered") || lower.includes("already registered") || lower.includes("already exists")) {
+  if (lower.includes("user already registered") || lower.includes("already registered") || lower.includes("already exists"))
     return "Bu e-poçt ünvanı artıq qeydiyyatdan keçib.";
-  }
-  if (lower.includes("email not confirmed") || lower.includes("email not verified")) {
+  if (lower.includes("email not confirmed") || lower.includes("email not verified"))
     return "E-poçt təsdiqlənməyib. Zəhmət olmasa e-poçt qutunuzu yoxlayın.";
-  }
-  if (lower.includes("password")) {
-    return "Şifrə tələblərə cavab vermir. Minimum 8 simvol olmalıdır.";
-  }
+  if (lower.includes("password"))
+    return "Şifrə tələblərə cavab vermir. Minimum 6 simvol olmalıdır.";
   return "Xəta baş verdi. Zəhmət olmasa yenidən yoxlayın.";
 }
 
@@ -81,66 +61,34 @@ function mapSupabaseUser(supabaseUser: SupabaseUser | null): User | null {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [supabase, setSupabase] = useState<ReturnType<typeof getSupabaseClient> | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
-  // Session-u yoxla
   useEffect(() => {
-    const initAuth = async () => {
-      try {
-        const client = await getSupabaseClient();
-        if (!client) {
-          console.warn("Supabase client not available - auth features disabled");
-          setLoading(false);
-          return () => {};
-        }
+    const client: SupabaseClient | null = createClient();
 
-        setSupabase(client);
+    if (!client) {
+      setLoading(false);
+      return;
+    }
 
-        try {
-          const { data: { session } } = await client.auth.getSession();
-          if (session?.user) {
-            setUser(mapSupabaseUser(session.user));
-          }
-
-          // Auth state dəyişikliyini dinlə
-          const { data: { subscription } } = client.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
-            if (session?.user) {
-              setUser(mapSupabaseUser(session.user));
-            } else {
-              setUser(null);
-            }
-          });
-
-          setLoading(false);
-          return () => subscription.unsubscribe();
-        } catch (authError) {
-          console.error("Auth session check error:", authError);
-          setError("Authentication service temporarily unavailable");
-          setLoading(false);
-          return () => {};
-        }
-      } catch (error) {
-        console.error("Auth initialization error:", error);
-        setError("Failed to initialize authentication");
-        setLoading(false);
-        return () => {};
-      }
-    };
-
-    let unsubscribe: (() => void) | null = null;
-    initAuth().then((cleanup) => {
-      unsubscribe = cleanup;
+    client.auth.getSession().then(({ data: { session } }) => {
+      setUser(mapSupabaseUser(session?.user ?? null));
+      setLoading(false);
+    }).catch(() => {
+      setLoading(false);
     });
 
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
+    const { data: { subscription } } = client.auth.onAuthStateChange(
+      (_event: AuthChangeEvent, session: Session | null) => {
+        setUser(mapSupabaseUser(session?.user ?? null));
+      }
+    );
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const login = async (email: string, password: string): Promise<{ error?: string }> => {
-    const client = await getSupabaseClient();
-    if (!client) return { error: "Autentifikasiya xidməti hazır deyil" };
+    const client = createClient();
+    if (!client) return { error: "Autentifikasiya xidməti konfiqurə edilməyib" };
     const { data, error } = await client.auth.signInWithPassword({ email, password });
     if (error) return { error: translateError(error.message) };
     if (data.user) setUser(mapSupabaseUser(data.user));
@@ -148,12 +96,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const register = async (userData: Partial<User> & { password?: string }): Promise<{ error?: string }> => {
-    if (!userData.email || !userData.password) {
-      return { error: "E-mail və şifrə tələb olunur" };
-    }
-
-    const client = await getSupabaseClient();
-    if (!client) return { error: "Autentifikasiya xidməti hazır deyil" };
+    if (!userData.email || !userData.password) return { error: "E-mail və şifrə tələb olunur" };
+    const client = createClient();
+    if (!client) return { error: "Autentifikasiya xidməti konfiqurə edilməyib" };
 
     const { data, error } = await client.auth.signUp({
       email: userData.email,
@@ -173,25 +118,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
-    const client = await getSupabaseClient();
-    if (client) {
-      await client.auth.signOut();
-    }
+    const client = createClient();
+    if (client) await client.auth.signOut();
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isLoggedIn: !!user,
-        role: user?.role || null,
-        loading,
-        login,
-        register,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={{ user, isLoggedIn: !!user, role: user?.role || null, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

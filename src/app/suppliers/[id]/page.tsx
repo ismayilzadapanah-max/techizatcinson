@@ -15,7 +15,7 @@ import type { SupplierProfile } from "@/lib/types";
 
 export default function SupplierProfilePage() {
   const { id } = useParams<{ id: string }>();
-  const supabase = useMemo(() => createClient(), []);
+  const supabase = useMemo(() => createClient()!, []);
   const [supplier, setSupplier] = useState<SupplierProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("products");
