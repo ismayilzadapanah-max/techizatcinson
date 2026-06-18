@@ -1,9 +1,23 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
-import { createClient } from "@/lib/supabase/client";
 import type { User, UserRole } from "@/lib/types";
-import type { User as SupabaseUser } from "@supabase/supabase-js";
+import type { User as SupabaseUser, AuthChangeEvent, Session } from "@supabase/supabase-js";
+
+let supabaseClient: ReturnType<typeof import("@/lib/supabase/client").createClient> | null = null;
+
+const getSupabaseClient = async () => {
+  if (!supabaseClient) {
+    try {
+      const { createClient } = await import("@/lib/supabase/client");
+      supabaseClient = createClient();
+    } catch (error) {
+      console.error("Failed to initialize Supabase client:", error);
+      return null;
+    }
+  }
+  return supabaseClient;
+};
 
 interface AuthContextType {
   user: User | null;
@@ -67,40 +81,56 @@ function mapSupabaseUser(supabaseUser: SupabaseUser | null): User | null {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
+  const [supabase, setSupabase] = useState<ReturnType<typeof getSupabaseClient> | null>(null);
 
   // Session-u yoxla
   useEffect(() => {
-    const checkSession = async () => {
+    const initAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const client = await getSupabaseClient();
+        if (!client) {
+          setLoading(false);
+          return () => {};
+        }
+
+        setSupabase(client);
+        const { data: { session } } = await client.auth.getSession();
         if (session?.user) {
           setUser(mapSupabaseUser(session.user));
         }
-      } catch {
-        // Sessiya yoxdur
-      } finally {
+
+        // Auth state dəyişikliyini dinlə
+        const { data: { subscription } } = client.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
+          if (session?.user) {
+            setUser(mapSupabaseUser(session.user));
+          } else {
+            setUser(null);
+          }
+        });
+
         setLoading(false);
+        return () => subscription.unsubscribe();
+      } catch (error) {
+        console.error("Auth initialization error:", error);
+        setLoading(false);
+        return () => {};
       }
     };
 
-    checkSession();
-
-    // Auth state dəyişikliyini dinlə
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setUser(mapSupabaseUser(session.user));
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
+    let unsubscribe: (() => void) | null = null;
+    initAuth().then((cleanup) => {
+      unsubscribe = cleanup;
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string): Promise<{ error?: string }> => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const client = await getSupabaseClient();
+    if (!client) return { error: "Autentifikasiya xidməti hazır deyil" };
+    const { data, error } = await client.auth.signInWithPassword({ email, password });
     if (error) return { error: translateError(error.message) };
     if (data.user) setUser(mapSupabaseUser(data.user));
     return {};
@@ -111,7 +141,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { error: "E-mail və şifrə tələb olunur" };
     }
 
-    const { data, error } = await supabase.auth.signUp({
+    const client = await getSupabaseClient();
+    if (!client) return { error: "Autentifikasiya xidməti hazır deyil" };
+
+    const { data, error } = await client.auth.signUp({
       email: userData.email,
       password: userData.password,
       options: {
@@ -129,7 +162,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
+    const client = await getSupabaseClient();
+    if (client) {
+      await client.auth.signOut();
+    }
     setUser(null);
   };
 

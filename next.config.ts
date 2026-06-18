@@ -78,6 +78,18 @@ const nextConfig: NextConfig = {
       { source: "/for-restaurant", destination: "/for-restaurants", permanent: true },
     ];
   },
+
+  // ============================================================
+  // Build optimization
+  // ============================================================
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 5,
+  },
+
+  experimental: {
+    optimizePackageImports: ["@supabase/ssr"],
+  },
 };
 
 export default nextConfig;

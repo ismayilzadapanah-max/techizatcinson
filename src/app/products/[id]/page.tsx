@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { WhatsAppButton } from "@/components/marketplace/WhatsAppButton";
 import { PhoneRevealButton } from "@/components/marketplace/PhoneRevealButton";
 import { FavoriteButton } from "@/components/marketplace/FavoriteButton";

@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { SITE } from "@/lib/constants";
 
-export const runtime = "edge";
+export const revalidate = 3600;
 
 export async function GET() {
   return new ImageResponse(
