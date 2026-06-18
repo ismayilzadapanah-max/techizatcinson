@@ -16,7 +16,9 @@ export function createClient() {
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
   if (!url || !key) {
-    console.error("Supabase URL and API key are required");
+    if (process.env.NODE_ENV === "development") {
+      console.warn("Supabase credentials not configured - auth features disabled");
+    }
     return null as any;
   }
 
