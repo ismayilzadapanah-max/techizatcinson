@@ -16,9 +16,6 @@ export function createClient() {
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!url || !key) {
-    if (process.env.NODE_ENV === "development") {
-      console.warn("Supabase credentials not configured - auth features disabled");
-    }
     return null as any;
   }
 
