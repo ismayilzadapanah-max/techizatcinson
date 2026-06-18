@@ -82,6 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [supabase, setSupabase] = useState<ReturnType<typeof getSupabaseClient> | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Session-u yoxla
   useEffect(() => {
@@ -89,29 +90,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const client = await getSupabaseClient();
         if (!client) {
+          console.warn("Supabase client not available - auth features disabled");
           setLoading(false);
           return () => {};
         }
 
         setSupabase(client);
-        const { data: { session } } = await client.auth.getSession();
-        if (session?.user) {
-          setUser(mapSupabaseUser(session.user));
-        }
 
-        // Auth state dəyişikliyini dinlə
-        const { data: { subscription } } = client.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
+        try {
+          const { data: { session } } = await client.auth.getSession();
           if (session?.user) {
             setUser(mapSupabaseUser(session.user));
-          } else {
-            setUser(null);
           }
-        });
 
-        setLoading(false);
-        return () => subscription.unsubscribe();
+          // Auth state dəyişikliyini dinlə
+          const { data: { subscription } } = client.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
+            if (session?.user) {
+              setUser(mapSupabaseUser(session.user));
+            } else {
+              setUser(null);
+            }
+          });
+
+          setLoading(false);
+          return () => subscription.unsubscribe();
+        } catch (authError) {
+          console.error("Auth session check error:", authError);
+          setError("Authentication service temporarily unavailable");
+          setLoading(false);
+          return () => {};
+        }
       } catch (error) {
         console.error("Auth initialization error:", error);
+        setError("Failed to initialize authentication");
         setLoading(false);
         return () => {};
       }
