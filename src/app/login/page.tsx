@@ -19,7 +19,13 @@ export default function LoginPage() {
   useEffect(() => {
     if (isLoggedIn && justLoggedIn.current) {
       justLoggedIn.current = false;
-      router.push(role === "supplier" ? "/account/supplier" : "/account/restaurant");
+      if (role === "admin") {
+        router.push("/admin");
+      } else if (role === "supplier") {
+        router.push("/account/supplier");
+      } else if (role === "restaurant") {
+        router.push("/account/restaurant");
+      }
     }
   }, [isLoggedIn, role, router]);
 

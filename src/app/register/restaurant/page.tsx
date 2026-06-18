@@ -22,7 +22,14 @@ export default function RestaurantRegisterPage() {
     e.preventDefault();
     if (!form.email || !form.password || !form.restaurantName) return;
     setLoading(true);
-    const result = await register({ fullName: form.restaurantName, email: form.email, phone: form.phone, role: "restaurant", password: form.password });
+    const result = await register({
+      fullName: form.contactPerson || form.restaurantName,
+      email: form.email,
+      phone: form.phone,
+      role: "restaurant",
+      password: form.password,
+      restaurantName: form.restaurantName,
+    });
     setLoading(false);
     if (result.error) { alert(result.error); return; }
     router.push("/account/restaurant");

@@ -45,14 +45,14 @@ function mapSupabaseUser(supabaseUser: SupabaseUser | null): User | null {
   const meta = supabaseUser.user_metadata || {};
   return {
     id: supabaseUser.id,
-    fullName: (meta.fullName as string) || supabaseUser.email?.split("@")[0] || "İstifadəçi",
+    fullName: (meta.full_name as string) || supabaseUser.email?.split("@")[0] || "İstifadəçi",
     email: supabaseUser.email || "",
     phone: (meta.phone as string) || "",
-    whatsapp: (meta.whatsapp as string) || "",
+    whatsapp: (meta.whatsapp_number as string) || "",
     role: (meta.role as UserRole) || "supplier",
-    avatarUrl: (meta.avatarUrl as string) || "",
+    avatarUrl: (meta.avatar_url as string) || "",
     isActive: true,
-    isApproved: (meta.isApproved as boolean) || false,
+    isApproved: (meta.is_approved as boolean) || false,
     createdAt: supabaseUser.created_at,
     updatedAt: supabaseUser.updated_at || supabaseUser.created_at,
   };
@@ -95,7 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return {};
   };
 
-  const register = async (userData: Partial<User> & { password?: string }): Promise<{ error?: string }> => {
+  const register = async (userData: Partial<User> & { password?: string; companyName?: string; restaurantName?: string; whatsappNumber?: string }): Promise<{ error?: string }> => {
     if (!userData.email || !userData.password) return { error: "E-mail və şifrə tələb olunur" };
     const client = createClient();
     if (!client) return { error: "Autentifikasiya xidməti konfiqurə edilməyib" };
@@ -105,9 +105,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password: userData.password,
       options: {
         data: {
-          fullName: userData.fullName || "",
+          full_name: userData.fullName || "",
           phone: userData.phone || "",
           role: userData.role || "supplier",
+          company_name: userData.companyName || "",
+          restaurant_name: userData.restaurantName || "",
+          whatsapp_number: userData.whatsappNumber || "",
         },
       },
     });

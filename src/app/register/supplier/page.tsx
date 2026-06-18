@@ -22,7 +22,14 @@ export default function SupplierRegisterPage() {
     e.preventDefault();
     if (!form.email || !form.password || !form.companyName) return;
     setLoading(true);
-    const result = await register({ fullName: form.companyName, email: form.email, phone: form.phone, role: "supplier", password: form.password });
+    const result = await register({
+      fullName: form.contactPerson || form.companyName,
+      email: form.email,
+      phone: form.phone,
+      role: "supplier",
+      password: form.password,
+      companyName: form.companyName,
+    });
     setLoading(false);
     if (result.error) { alert(result.error); return; }
     router.push("/account/supplier");
