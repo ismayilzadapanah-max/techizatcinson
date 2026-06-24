@@ -45,13 +45,13 @@ export function RestaurantAccountSidebar({ open = false, onClose }: RestaurantAc
               key={item.href}
               href={item.href}
               onClick={onClose}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all group ${
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all border ${
                 isActive
-                  ? "bg-surface-container-highest text-on-surface border-l-[3px] border-[#D47092]"
-                  : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
+                  ? "bg-[#2d315d] text-white border-[#D47092]/50 border-l-[3px] border-l-[#D47092]"
+                  : "text-[#C5C5D3] border-transparent hover:bg-[#171b47] hover:border-[#243786]/40 hover:text-white"
               }`}
             >
-              <span className={`material-symbols-outlined text-[20px] ${isActive ? "text-primary" : "group-hover:text-primary"}`}>
+              <span className={`material-symbols-outlined text-[20px] ${isActive ? "text-[#B9C3FF]" : "text-[#9DB1CA]"}`}>
                 {item.icon}
               </span>
               <span>{item.label}</span>

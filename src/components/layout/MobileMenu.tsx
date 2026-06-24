@@ -24,7 +24,6 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
     onClose();
   };
 
-  // Rol əsaslı link filtrləmə — harada olursa olsun işləyir
   const filteredLinks = useMemo(() => {
     const isSupplier = role === "supplier";
     const isRestaurant = role === "restaurant";
@@ -52,62 +51,66 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
       />
 
       {/* Drawer */}
-      <div className="absolute right-0 top-0 h-full w-[280px] bg-[#0B0E3B] border-l border-white/10 shadow-2xl animate-in slide-in-from-right duration-300">
-        <div className="flex items-center justify-between p-4 border-b border-white/10">
-          <span className="text-lg font-bold text-on-background">Menyu</span>
+      <div className="absolute right-0 top-0 h-full w-[280px] bg-[#0B0E3B] border-l border-[#243786]/40 shadow-2xl flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-4 border-b border-[#243786]/30">
+          <span className="text-base font-bold text-white">Menyu</span>
           <button
             onClick={onClose}
-            className="p-2 text-on-surface-variant hover:text-primary transition-colors"
+            className="p-2 text-[#9DB1CA] hover:text-white transition-colors rounded-lg hover:bg-white/10"
             aria-label="Menyunu bağla"
           >
-            <span className="material-symbols-outlined">close</span>
+            <span className="material-symbols-outlined text-xl">close</span>
           </button>
         </div>
 
-        <nav className="p-4 space-y-1">
-          {/* Elan yerləşdir — yalnız təchizatçılar və ya giriş etməyənlər görsün */}
+        {/* Nav */}
+        <nav className="flex-1 overflow-y-auto p-3 space-y-1">
+          {/* Elan yerləşdir */}
           {(!isLoggedIn || role === "supplier") && (
             <>
               <Link
                 href={listingHref}
                 onClick={onClose}
-                className="flex items-center gap-3 px-4 py-3 bg-[#D47092] text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-all"
+                className="flex items-center gap-3 px-4 py-3 bg-[#D47092] text-white rounded-xl text-sm font-semibold hover:opacity-90 transition-all"
               >
-                <span className="material-symbols-outlined">add_circle</span>
+                <span className="material-symbols-outlined text-[20px]">add_circle</span>
                 Elan yerləşdir
               </Link>
-              <hr className="border-white/10 my-2" />
+              <div className="h-px bg-[#243786]/30 my-2" />
             </>
           )}
 
+          {/* Nav links */}
           {filteredLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               onClick={onClose}
-              className="flex items-center gap-3 px-4 py-3 bg-white/5 border border-white/8 text-white rounded-lg transition-all text-sm font-medium hover:bg-white/10 hover:border-white/15 hover:text-primary"
+              className="flex items-center gap-3 px-4 py-3 bg-[#15164F] border border-[#243786]/50 text-[#E0E0FF] rounded-xl text-sm font-medium transition-all hover:bg-[#1A1D60] hover:border-[#243786] hover:text-white"
             >
               {link.label}
             </Link>
           ))}
 
-          <hr className="border-white/10 my-4" />
+          <div className="h-px bg-[#243786]/30 my-2" />
 
+          {/* Auth links */}
           {isLoggedIn ? (
             <>
               <Link
                 href={role === "supplier" ? "/account/supplier" : "/account/restaurant"}
                 onClick={onClose}
-                className="flex items-center gap-3 px-4 py-3 bg-white/5 border border-white/8 text-white rounded-lg transition-all text-sm font-medium hover:bg-white/10 hover:border-white/15 hover:text-primary"
+                className="flex items-center gap-3 px-4 py-3 bg-[#15164F] border border-[#243786]/50 text-[#E0E0FF] rounded-xl text-sm font-medium transition-all hover:bg-[#1A1D60] hover:border-[#243786] hover:text-white"
               >
-                <span className="material-symbols-outlined">account_circle</span>
+                <span className="material-symbols-outlined text-[20px]">account_circle</span>
                 {user?.fullName || "Kabinetim"}
               </Link>
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-4 py-3 text-error hover:bg-error/5 rounded-lg transition-all text-sm font-medium"
+                className="w-full flex items-center gap-3 px-4 py-3 bg-[#93000a]/20 border border-[#93000a]/40 text-[#ffb4ab] rounded-xl text-sm font-medium transition-all hover:bg-[#93000a]/30 hover:border-[#93000a]/60"
               >
-                <span className="material-symbols-outlined">logout</span>
+                <span className="material-symbols-outlined text-[20px]">logout</span>
                 Çıxış
               </button>
             </>
@@ -116,15 +119,15 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
               <Link
                 href="/login"
                 onClick={onClose}
-                className="flex items-center gap-3 px-4 py-3 bg-white/5 border border-white/8 text-white rounded-lg transition-all text-sm font-medium hover:bg-white/10 hover:border-white/15 hover:text-primary"
+                className="flex items-center gap-3 px-4 py-3 bg-[#15164F] border border-[#243786]/50 text-[#E0E0FF] rounded-xl text-sm font-medium transition-all hover:bg-[#1A1D60] hover:border-[#243786] hover:text-white"
               >
-                <span className="material-symbols-outlined">login</span>
+                <span className="material-symbols-outlined text-[20px]">login</span>
                 Daxil ol
               </Link>
               <Link
                 href="/register"
                 onClick={onClose}
-                className="flex items-center gap-3 px-4 py-3 bg-[#243786] text-white rounded-lg text-sm font-semibold hover:bg-[#141647] transition-colors justify-center mt-2"
+                className="flex items-center gap-3 justify-center px-4 py-3 bg-[#243786] border border-[#243786] text-white rounded-xl text-sm font-semibold transition-all hover:bg-[#141647] hover:border-[#141647] mt-1"
               >
                 Qeydiyyatdan keç
               </Link>
