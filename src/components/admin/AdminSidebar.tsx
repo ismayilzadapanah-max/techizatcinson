@@ -20,13 +20,18 @@ const MENU_ITEMS = [
   { label: "Sayt ayarları", href: "/admin/settings", icon: "settings" },
 ];
 
-export function AdminSidebar() {
+interface AdminSidebarProps {
+  open?: boolean;
+  onClose?: () => void;
+}
+
+export function AdminSidebar({ open = false, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
 
-  return (
-    <aside className="fixed left-0 top-0 h-screen w-[280px] bg-surface-container-lowest flex flex-col py-6 z-50 border-r border-white/5">
+  const sidebarContent = (
+    <aside className="flex flex-col h-full w-[280px] bg-[#050735] py-6 border-r border-white/5">
       <div className="px-6 mb-8">
-        <Link href="/" className="flex items-center gap-3">
+        <Link href="/" className="flex items-center gap-3" onClick={onClose}>
           <div className="w-10 h-10 bg-[#243786] rounded-lg flex items-center justify-center">
             <span className="material-symbols-outlined text-white text-xl">hub</span>
           </div>
@@ -44,17 +49,14 @@ export function AdminSidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onClose}
               className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all group ${
                 isActive
                   ? "bg-surface-container-highest text-on-surface border-l-[3px] border-[#D47092]"
                   : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
               }`}
             >
-              <span
-                className={`material-symbols-outlined text-[20px] ${
-                  isActive ? "text-primary" : "group-hover:text-primary"
-                }`}
-              >
+              <span className={`material-symbols-outlined text-[20px] ${isActive ? "text-primary" : "group-hover:text-primary"}`}>
                 {item.icon}
               </span>
               <span>{item.label}</span>
@@ -66,6 +68,7 @@ export function AdminSidebar() {
       <div className="px-3 pt-4 border-t border-white/5 space-y-0.5">
         <Link
           href="/account"
+          onClick={onClose}
           className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all"
         >
           <span className="material-symbols-outlined text-[20px]">account_circle</span>
@@ -73,6 +76,7 @@ export function AdminSidebar() {
         </Link>
         <Link
           href="/login"
+          onClick={onClose}
           className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-error hover:bg-error-container/10 transition-all"
         >
           <span className="material-symbols-outlined text-[20px]">logout</span>
@@ -80,5 +84,37 @@ export function AdminSidebar() {
         </Link>
       </div>
     </aside>
+  );
+
+  return (
+    <>
+      {/* Desktop: always visible fixed sidebar */}
+      <div className="hidden lg:block fixed left-0 top-0 h-screen w-[280px] z-50">
+        {sidebarContent}
+      </div>
+
+      {/* Mobile: overlay drawer */}
+      <div
+        className={`fixed inset-0 z-50 lg:hidden transition-all duration-300 ${
+          open ? "pointer-events-auto" : "pointer-events-none"
+        }`}
+      >
+        {/* Backdrop */}
+        <div
+          className={`absolute inset-0 bg-black/60 transition-opacity duration-300 ${
+            open ? "opacity-100" : "opacity-0"
+          }`}
+          onClick={onClose}
+        />
+        {/* Drawer */}
+        <div
+          className={`absolute left-0 top-0 h-full transition-transform duration-300 ${
+            open ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          {sidebarContent}
+        </div>
+      </div>
+    </>
   );
 }

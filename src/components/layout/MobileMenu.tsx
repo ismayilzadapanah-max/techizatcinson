@@ -52,7 +52,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
       />
 
       {/* Drawer */}
-      <div className="absolute right-0 top-0 h-full w-[280px] bg-surface-container-lowest border-l border-white/10 shadow-2xl animate-in slide-in-from-right duration-300">
+      <div className="absolute right-0 top-0 h-full w-[280px] bg-[#0B0E3B] border-l border-white/10 shadow-2xl animate-in slide-in-from-right duration-300">
         <div className="flex items-center justify-between p-4 border-b border-white/10">
           <span className="text-lg font-bold text-on-background">Menyu</span>
           <button
