@@ -87,7 +87,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
               key={link.href}
               href={link.href}
               onClick={onClose}
-              className="flex items-center gap-3 px-4 py-3 bg-[#15164F] border border-[#243786]/50 text-[#E0E0FF] rounded-xl text-sm font-medium transition-all hover:bg-[#1A1D60] hover:border-[#243786] hover:text-white"
+              className="flex items-center gap-3 px-4 py-3 bg-[#243786] border border-[#243786] text-white rounded-xl text-sm font-medium transition-all hover:bg-[#1A1D60] hover:border-[#1A1D60]"
             >
               {link.label}
             </Link>
@@ -101,7 +101,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
               <Link
                 href={role === "supplier" ? "/account/supplier" : "/account/restaurant"}
                 onClick={onClose}
-                className="flex items-center gap-3 px-4 py-3 bg-[#15164F] border border-[#243786]/50 text-[#E0E0FF] rounded-xl text-sm font-medium transition-all hover:bg-[#1A1D60] hover:border-[#243786] hover:text-white"
+                className="flex items-center gap-3 px-4 py-3 bg-[#243786] border border-[#243786] text-white rounded-xl text-sm font-medium transition-all hover:bg-[#1A1D60] hover:border-[#1A1D60]"
               >
                 <span className="material-symbols-outlined text-[20px]">account_circle</span>
                 {user?.fullName || "Kabinetim"}
@@ -119,7 +119,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
               <Link
                 href="/login"
                 onClick={onClose}
-                className="flex items-center gap-3 px-4 py-3 bg-[#15164F] border border-[#243786]/50 text-[#E0E0FF] rounded-xl text-sm font-medium transition-all hover:bg-[#1A1D60] hover:border-[#243786] hover:text-white"
+                className="flex items-center gap-3 px-4 py-3 bg-[#243786] border border-[#243786] text-white rounded-xl text-sm font-medium transition-all hover:bg-[#1A1D60] hover:border-[#1A1D60]"
               >
                 <span className="material-symbols-outlined text-[20px]">login</span>
                 Daxil ol
