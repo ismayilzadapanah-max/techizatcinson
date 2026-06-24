@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 
@@ -10,15 +10,22 @@ export const dynamic = "force-dynamic";
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, loading, isLoggedIn } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Login səhifəsi auth yoxlamasından kənar olmalıdır
+  const isLoginPage = pathname === "/admin/login";
+
   useEffect(() => {
-    if (!loading) {
+    if (!loading && !isLoginPage) {
       if (!isLoggedIn || user?.role !== "admin") {
         router.replace("/admin/login");
       }
     }
-  }, [user, loading, isLoggedIn, router]);
+  }, [user, loading, isLoggedIn, router, isLoginPage]);
+
+  // Login səhifəsini birbaşa render et
+  if (isLoginPage) return <>{children}</>;
 
   if (loading) {
     return (
