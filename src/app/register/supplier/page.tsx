@@ -29,6 +29,8 @@ export default function SupplierRegisterPage() {
       role: "supplier",
       password: form.password,
       companyName: form.companyName,
+      city: form.city,
+      activityArea: form.category,
     });
     setLoading(false);
     if (result.error) { alert(result.error); return; }

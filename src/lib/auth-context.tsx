@@ -11,7 +11,15 @@ interface AuthContextType {
   role: UserRole | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ error?: string }>;
-  register: (userData: Partial<User> & { password?: string }) => Promise<{ error?: string }>;
+  register: (userData: Partial<User> & {
+    password?: string;
+    companyName?: string;
+    restaurantName?: string;
+    whatsappNumber?: string;
+    city?: string;
+    activityArea?: string;
+    address?: string;
+  }) => Promise<{ error?: string }>;
   logout: () => Promise<void>;
 }
 
@@ -95,7 +103,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return {};
   };
 
-  const register = async (userData: Partial<User> & { password?: string; companyName?: string; restaurantName?: string; whatsappNumber?: string }): Promise<{ error?: string }> => {
+  const register = async (userData: Partial<User> & {
+    password?: string;
+    companyName?: string;
+    restaurantName?: string;
+    whatsappNumber?: string;
+    city?: string;
+    activityArea?: string;
+    address?: string;
+  }): Promise<{ error?: string }> => {
     if (!userData.email || !userData.password) return { error: "E-mail və şifrə tələb olunur" };
     const client = createClient();
     if (!client) return { error: "Autentifikasiya xidməti konfiqurə edilməyib" };
@@ -116,7 +132,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     if (error) return { error: translateError(error.message) };
-    if (data.user) setUser(mapSupabaseUser(data.user));
+
+    if (data.user) {
+      const role = userData.role || "supplier";
+      if (role === "supplier") {
+        await client.from("supplier_profiles").insert({
+          id: data.user.id,
+          user_id: data.user.id,
+          company_name: userData.companyName || "",
+          contact_person: userData.fullName || "",
+          email: userData.email || "",
+          phone: userData.phone || "",
+          activity_area: userData.activityArea || "",
+          city: userData.city || "",
+          approval_status: "pending",
+          rating: 0,
+          review_count: 0,
+          product_count: 0,
+        });
+      } else if (role === "restaurant") {
+        await client.from("restaurant_profiles").insert({
+          id: data.user.id,
+          user_id: data.user.id,
+          restaurant_name: userData.restaurantName || "",
+          contact_person: userData.fullName || "",
+          email: userData.email || "",
+          phone: userData.phone || "",
+          city: userData.city || "",
+          address: userData.address || "",
+          approval_status: "pending",
+        });
+      }
+      setUser(mapSupabaseUser(data.user));
+    }
     return {};
   };
 

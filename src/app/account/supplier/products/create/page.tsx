@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { CATEGORIES } from "@/lib/constants";
+import { createClient } from "@/lib/supabase/client";
+import { useAuth } from "@/lib/auth-context";
 
 const STEPS = [
   { id: 1, label: "Məlumat" },
@@ -15,8 +18,12 @@ const STEPS = [
 const REGIONS = ["Bakı", "Sumqayıt", "Gəncə", "Abşeron"];
 
 export default function CreateProductPage() {
+  const { user } = useAuth();
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   // Step 1: Əsas məlumatlar
   const [productName, setProductName] = useState("");
@@ -73,9 +80,53 @@ export default function CreateProductPage() {
     setImages((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (!user) { setSaveError("Giriş tələb olunur."); return; }
+    if (!productName) { setSaveError("Məhsul adı tələb olunur."); return; }
+    if (!price) { setSaveError("Qiymət tələb olunur."); return; }
+
+    setSaving(true);
+    setSaveError("");
+
+    const supabase = createClient();
+    if (!supabase) { setSaveError("Bağlantı xətası."); setSaving(false); return; }
+
+    const selectedCatName = CATEGORIES.find((c) => c.id === category)?.name || category;
+
+    const { error } = await supabase.from("product_listings").insert({
+      supplier_id: user.id,
+      supplier_name: user.fullName,
+      product_name: productName,
+      category_id: category,
+      category_name: selectedCatName,
+      subcategory_id: subCategory,
+      description: description,
+      price: parseFloat(price) || 0,
+      price_unit: unit,
+      min_order_qty: parseFloat(minOrder) || 1,
+      negotiable: negotiable,
+      stock_qty: parseInt(stockQty) || 0,
+      stock_status: stockQty && parseInt(stockQty) > 0 ? "in_stock" : "out_of_stock",
+      delivery_regions: selectedRegions,
+      delivery_time: deliveryTime,
+      delivery_fee: parseFloat(deliveryFee) || 0,
+      free_delivery: !deliveryFee || deliveryFee === "0",
+      contact_person: contactPerson,
+      contact_phone: contactPhone,
+      contact_whatsapp: contactWhatsapp,
+      contact_whatsapp_link: whatsappLink,
+      contact_email: contactEmail,
+      approval_status: "pending",
+      is_active: true,
+      view_count: 0,
+    });
+
+    setSaving(false);
+    if (error) {
+      setSaveError("Xəta baş verdi: " + error.message);
+      return;
+    }
     setSubmitted(true);
-    // Real tətbiqdə Supabase-ə və ya API-yə göndəriləcək
   };
 
   if (submitted) {
@@ -330,6 +381,14 @@ export default function CreateProductPage() {
         )}
       </div>
 
+      {/* Xəta mesajı */}
+      {saveError && (
+        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 flex items-center gap-2">
+          <span className="material-symbols-outlined text-[18px]">error</span>
+          {saveError}
+        </div>
+      )}
+
       {/* Navigation */}
       <div className="flex justify-between">
         <button onClick={prev} disabled={step === 1} className={`flex items-center gap-2 px-6 py-3 rounded-lg border border-[#E9E8EE] text-brand-muted font-semibold text-sm transition-all ${step === 1 ? "opacity-30 cursor-not-allowed" : "hover:bg-[#F3F2F7]"}`}>
@@ -340,8 +399,13 @@ export default function CreateProductPage() {
             İrəli<span className="material-symbols-outlined text-[18px]">arrow_forward</span>
           </button>
         ) : (
-          <button onClick={handleSubmit} className="flex items-center gap-2 px-8 py-3 rounded-lg bg-[#D47092] text-white font-semibold text-sm hover:opacity-90 transition-all shadow-lg shadow-[#D47092]/20">
-            Təsdiq et və dərc et<span className="material-symbols-outlined text-[18px]">check_circle</span>
+          <button
+            onClick={handleSubmit}
+            disabled={saving}
+            className="flex items-center gap-2 px-8 py-3 rounded-lg bg-[#D47092] text-white font-semibold text-sm hover:opacity-90 transition-all shadow-lg shadow-[#D47092]/20 disabled:opacity-60"
+          >
+            {saving ? "Göndərilir..." : "Təsdiq et və dərc et"}
+            <span className="material-symbols-outlined text-[18px]">{saving ? "sync" : "check_circle"}</span>
           </button>
         )}
       </div>

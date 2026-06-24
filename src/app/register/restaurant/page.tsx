@@ -29,6 +29,8 @@ export default function RestaurantRegisterPage() {
       role: "restaurant",
       password: form.password,
       restaurantName: form.restaurantName,
+      city: form.city,
+      address: form.address,
     });
     setLoading(false);
     if (result.error) { alert(result.error); return; }
