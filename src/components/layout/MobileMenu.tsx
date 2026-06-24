@@ -85,7 +85,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
               key={link.href}
               href={link.href}
               onClick={onClose}
-              className="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container hover:text-primary rounded-lg transition-all text-sm font-medium"
+              className="flex items-center gap-3 px-4 py-3 bg-white/5 border border-white/8 text-white rounded-lg transition-all text-sm font-medium hover:bg-white/10 hover:border-white/15 hover:text-primary"
             >
               {link.label}
             </Link>
@@ -98,7 +98,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
               <Link
                 href={role === "supplier" ? "/account/supplier" : "/account/restaurant"}
                 onClick={onClose}
-                className="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container hover:text-primary rounded-lg transition-all text-sm font-medium"
+                className="flex items-center gap-3 px-4 py-3 bg-white/5 border border-white/8 text-white rounded-lg transition-all text-sm font-medium hover:bg-white/10 hover:border-white/15 hover:text-primary"
               >
                 <span className="material-symbols-outlined">account_circle</span>
                 {user?.fullName || "Kabinetim"}
@@ -116,7 +116,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
               <Link
                 href="/login"
                 onClick={onClose}
-                className="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container hover:text-primary rounded-lg transition-all text-sm font-medium"
+                className="flex items-center gap-3 px-4 py-3 bg-white/5 border border-white/8 text-white rounded-lg transition-all text-sm font-medium hover:bg-white/10 hover:border-white/15 hover:text-primary"
               >
                 <span className="material-symbols-outlined">login</span>
                 Daxil ol
