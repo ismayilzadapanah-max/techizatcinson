@@ -7,7 +7,8 @@ import { SITE } from "@/lib/constants";
 const MENU_ITEMS = [
   { label: "İcmal", href: "/admin", icon: "dashboard" },
   { label: "Sifarişlər", href: "/admin/orders", icon: "receipt_long" },
-  { label: "İstifadəçilər", href: "/admin/users", icon: "people" },
+  { label: "İstifadəçilər", href: "/admin/users", icon: "people", exact: true },
+  { label: "Yeni istifadəçi yarat", href: "/admin/users/create", icon: "person_add" },
   { label: "Təchizatçılar", href: "/admin/suppliers", icon: "local_shipping" },
   { label: "Restoranlar", href: "/admin/restaurants", icon: "restaurant" },
   { label: "Məhsul elanları", href: "/admin/products", icon: "inventory_2" },
@@ -45,7 +46,9 @@ export function AdminSidebar({ open = false, onClose }: AdminSidebarProps) {
 
       <nav className="flex-1 overflow-y-auto px-3 space-y-0.5">
         {MENU_ITEMS.map((item) => {
-          const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
+          const isActive = item.exact
+            ? pathname === item.href
+            : pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
           return (
             <Link
               key={item.href}
