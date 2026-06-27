@@ -114,7 +114,7 @@ export default function LoginPage() {
             <span>AZ</span>
           </div>
           <div className="h-px w-16 bg-outline-variant" />
-          <Link href="/admin/login" className="text-[10px] text-on-surface-variant hover:text-primary transition-colors font-medium uppercase tracking-wider">Admin Paneline Daxol</Link>
+          <Link href="/admin/login" className="text-[10px] text-on-surface-variant hover:text-primary transition-colors font-medium uppercase tracking-wider">Admin Panelinə Daxil Ol</Link>
         </div>
       </main>
     </div>
