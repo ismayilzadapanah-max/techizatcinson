@@ -6,6 +6,7 @@ import { SITE } from "@/lib/constants";
 
 const MENU_ITEMS = [
   { label: "İcmal", href: "/admin", icon: "dashboard" },
+  { label: "Sifarişlər", href: "/admin/orders", icon: "receipt_long" },
   { label: "İstifadəçilər", href: "/admin/users", icon: "people" },
   { label: "Təchizatçılar", href: "/admin/suppliers", icon: "local_shipping" },
   { label: "Restoranlar", href: "/admin/restaurants", icon: "restaurant" },

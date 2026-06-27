@@ -7,6 +7,8 @@ import { SITE } from "@/lib/constants";
 const MENU_ITEMS = [
   { label: "İcmal", href: "/account/restaurant", icon: "dashboard" },
   { label: "Profilim", href: "/account/restaurant/profile", icon: "restaurant" },
+  { label: "Sifarişlərim", href: "/account/restaurant/orders", icon: "shopping_bag" },
+  { label: "Sifariş tarixçəsi", href: "/account/restaurant/order-history", icon: "history" },
   { label: "Favorit məhsullar", href: "/account/restaurant/favorites?type=product", icon: "inventory_2" },
   { label: "Favorit təchizatçılar", href: "/account/restaurant/favorites?type=supplier", icon: "local_shipping" },
   { label: "Sorğular", href: "/account/restaurant/rfq", icon: "request_quote" },

@@ -276,3 +276,90 @@ export interface RestaurantDashboardStats {
   sentRFQs: number;
   unreadMessages: number;
 }
+
+// ============================================================
+// Sifariş İzləmə — Order Tracking
+// ============================================================
+
+export type OrderStatus =
+  | 'pending'
+  | 'accepted'
+  | 'preparing'
+  | 'on_delivery'
+  | 'delivered'
+  | 'completed'
+  | 'cancelled'
+  | 'rejected';
+
+export interface Order {
+  id: string;
+  restaurantId: string;
+  supplierId: string;
+  orderedBy?: string;
+  orderNumber: string;
+  status: OrderStatus;
+  deliveryAddress?: string;
+  deliveryDate?: string;
+  note?: string;
+  totalAmount: number;
+  qualityRating?: number;
+  satisfactionScore?: number;
+  satisfactionNote?: string;
+  deliveredAt?: string;
+  createdAt: string;
+  updatedAt: string;
+  // Joined data
+  restaurantName?: string;
+  supplierName?: string;
+  items?: OrderItem[];
+  statusHistory?: OrderStatusHistory[];
+  review?: OrderReview | null;
+}
+
+export interface OrderItem {
+  id: string;
+  orderId: string;
+  productId?: string;
+  productName: string;
+  quantity: number;
+  unit?: string;
+  unitPrice?: number;
+  totalPrice?: number;
+  createdAt: string;
+}
+
+export interface OrderStatusHistory {
+  id: string;
+  orderId: string;
+  oldStatus?: string;
+  newStatus: string;
+  changedBy?: string;
+  note?: string;
+  createdAt: string;
+}
+
+export interface OrderReview {
+  id: string;
+  orderId: string;
+  restaurantId?: string;
+  supplierId?: string;
+  rating: number;
+  qualityNote?: string;
+  deliveryNote?: string;
+  satisfactionScore?: number;
+  createdAt: string;
+}
+
+export interface CreateOrderPayload {
+  productId: string;
+  productName: string;
+  supplierId: string;
+  restaurantId: string;
+  orderedBy: string;
+  quantity: number;
+  unit?: string;
+  unitPrice?: number;
+  deliveryAddress: string;
+  deliveryDate: string;
+  note?: string;
+}
