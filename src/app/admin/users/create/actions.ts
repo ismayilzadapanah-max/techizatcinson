@@ -1,5 +1,11 @@
 "use server";
 
+// handle_new_user() trigger bütün yeni auth user-lər üçün avtomatik işləyir:
+// → profiles, supplier_profiles, restaurant_profiles yaradır (user_metadata-dan oxuyur)
+// Bu action yalnız trigger-in etmədiklərini edir:
+// → supplier_team_members yaratmaq
+// → supplier_profiles-da approval_status='approved' qoymaq
+
 import { revalidatePath } from "next/cache";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { requireAdmin } from "@/lib/auth/require-admin";
@@ -10,10 +16,8 @@ export async function createUserByAdmin(
   formData: FormData
 ): Promise<{ success: boolean; message: string }> {
   try {
-    // Admin yoxlaması
     await requireAdmin();
 
-    // Form məlumatları
     const email = String(formData.get("email") || "").trim();
     const password = String(formData.get("password") || "").trim();
     const role = String(formData.get("role") || "").trim() as UserRole;
@@ -22,31 +26,21 @@ export async function createUserByAdmin(
     const companyName = String(formData.get("companyName") || "").trim();
     const restaurantName = String(formData.get("restaurantName") || "").trim();
 
-    // Validasiya
     if (!email || !password || !role) {
-      return {
-        success: false,
-        message: "E-mail, şifrə və rol mütləq doldurulmalıdır.",
-      };
+      return { success: false, message: "E-mail, şifrə və rol mütləq doldurulmalıdır." };
     }
-
     if (password.length < 6) {
-      return {
-        success: false,
-        message: "Şifrə minimum 6 simvol olmalıdır.",
-      };
+      return { success: false, message: "Şifrə minimum 6 simvol olmalıdır." };
     }
-
     if (!["admin", "supplier", "restaurant"].includes(role)) {
-      return {
-        success: false,
-        message: "Rol düzgün seçilməyib.",
-      };
+      return { success: false, message: "Rol düzgün seçilməyib." };
     }
 
     const supabase = getSupabaseAdmin();
 
-    // ── 1. Supabase Auth-da user yarat ───────────────────────────────────
+    // ── Auth user yarat ───────────────────────────────────────────────────
+    // handle_new_user() trigger avtomatik olaraq:
+    //   profiles, supplier_profiles, restaurant_profiles yaradır
     const { data: authData, error: authError } =
       await supabase.auth.admin.createUser({
         email,
@@ -63,7 +57,7 @@ export async function createUserByAdmin(
 
     if (authError) {
       console.error("[createUserByAdmin] Auth xətası:", authError);
-      const msg = authError.message.includes("already registered")
+      const msg = authError.message.toLowerCase().includes("already registered")
         ? "E-mail artıq mövcuddur."
         : authError.message;
       return { success: false, message: msg };
@@ -74,103 +68,55 @@ export async function createUserByAdmin(
       return { success: false, message: "Auth istifadəçi yaradılmadı." };
     }
 
-    // ── 2. profiles cədvəli ───────────────────────────────────────────────
-    const { error: profileError } = await supabase.from("profiles").upsert({
-      id: user.id,
-      role,
-      full_name: fullName,
-      email,
-      phone,
-      is_active: true,
-    });
+    // Trigger-in işləməsi üçün qısa gözləmə
+    await new Promise((r) => setTimeout(r, 500));
 
-    if (profileError) {
-      console.error("[createUserByAdmin] Profil xətası:", profileError);
-      return { success: false, message: `Profil yaradılmadı: ${profileError.message}` };
-    }
-
-    // ── 3. Supplier ───────────────────────────────────────────────────────
+    // ── Supplier: approval_status + team member ───────────────────────────
     if (role === "supplier") {
-      // supplier_profiles
-      const { data: supplierProfile, error: supplierError } = await supabase
+      // Trigger profili 'pending' ilə yaradır — biz 'approved' edirik
+      const { error: approvalError } = await supabase
         .from("supplier_profiles")
-        .insert({
-          user_id: user.id,
-          company_name: companyName || fullName,
-          contact_person: fullName,
-          phone,
-          email,
-          approval_status: "approved",
-          is_active: true,
-        })
-        .select("id")
-        .single();
+        .update({ approval_status: "approved" })
+        .eq("user_id", user.id);
 
-      if (supplierError) {
-        console.error("[createUserByAdmin] Supplier profil xətası:", supplierError);
-        return {
-          success: false,
-          message: `Təchizatçı profili yaradılmadı: ${supplierError.message}`,
-        };
+      if (approvalError) {
+        console.error("[createUserByAdmin] Approval update xətası:", approvalError);
       }
 
-      // supplier_team_members — DB sxeması: role, is_active (member_role/status yoxdur!)
-      if (supplierProfile?.id) {
+      // Team member — trigger bunu yaratmır
+      const { data: sp } = await supabase
+        .from("supplier_profiles")
+        .select("id")
+        .eq("user_id", user.id)
+        .single();
+
+      if (sp?.id) {
         const { error: teamError } = await supabase
           .from("supplier_team_members")
           .insert({
-            supplier_id: supplierProfile.id,
+            supplier_id: sp.id,
             user_id: user.id,
-            role: "owner",        // DB sütunu: role
-            is_active: true,      // DB sütunu: is_active
+            role: "owner",
+            is_active: true,
             invited_by: user.id,
           });
 
         if (teamError) {
           console.error("[createUserByAdmin] Team member xətası:", teamError);
-          return {
-            success: false,
-            message: `Team member yaradılmadı: ${teamError.message}`,
-          };
         }
       }
     }
 
-    // ── 4. Restaurant ─────────────────────────────────────────────────────
-    // restaurant_profiles-da approval_status sütunu yoxdur
-    if (role === "restaurant") {
-      const { error: restaurantError } = await supabase
-        .from("restaurant_profiles")
-        .insert({
-          user_id: user.id,
-          restaurant_name: restaurantName || fullName,
-          contact_person: fullName,
-          phone,
-          email,
-          is_active: true,
-        });
-
-      if (restaurantError) {
-        console.error("[createUserByAdmin] Restaurant profil xətası:", restaurantError);
-        return {
-          success: false,
-          message: `Restoran profili yaradılmadı: ${restaurantError.message}`,
-        };
-      }
-    }
-
-    // ── 5. Admin — yalnız profiles ───────────────────────────────────────
-    // profiles artıq yuxarıda yazıldı, əlavə iş yoxdur
+    // ── Admin / Restaurant ────────────────────────────────────────────────
+    // Trigger profiles (və restaurant_profiles) artıq yaratdı — əlavə iş yoxdur.
 
     revalidatePath("/admin/users");
-
     return { success: true, message: "İstifadəçi uğurla yaradıldı." };
   } catch (err) {
     console.error("[createUserByAdmin] Gözlənilməz xəta:", err);
     return {
       success: false,
-      message:
-        err instanceof Error ? err.message : "Server xətası baş verdi.",
+      message: err instanceof Error ? err.message : "Server xətası baş verdi.",
     };
   }
 }
