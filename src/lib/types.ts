@@ -2,7 +2,7 @@
 // Full Stack-Ready Data Models — B2B Restaurant-Supplier Marketplace
 // ============================================================
 
-export type UserRole = 'admin' | 'supplier' | 'restaurant';
+export type UserRole = 'admin' | 'supplier' | 'supplier_staff' | 'restaurant';
 export type ApprovalStatus = 'pending' | 'approved' | 'rejected' | 'disabled';
 export type StockStatus = 'in_stock' | 'pre_order' | 'out_of_stock';
 export type RFQStatus = 'pending' | 'answered' | 'accepted' | 'rejected' | 'expired';
@@ -362,4 +362,72 @@ export interface CreateOrderPayload {
   deliveryAddress: string;
   deliveryDate: string;
   note?: string;
+}
+
+// ─── Team Management ─────────────────────────────────────────
+export type TeamRole =
+  | 'owner'
+  | 'manager'
+  | 'orders_manager'
+  | 'stock_manager'
+  | 'product_manager'
+  | 'finance_manager'
+  | 'viewer';
+
+export type InvitationStatus = 'pending' | 'accepted' | 'expired' | 'cancelled';
+
+export interface TeamMember {
+  id: string;
+  supplierId: string;
+  userId: string;
+  role: TeamRole;
+  isActive: boolean;
+  invitedBy?: string;
+  joinedAt: string;
+  createdAt: string;
+  updatedAt: string;
+  // Joined
+  fullName?: string;
+  email?: string;
+  phone?: string;
+}
+
+export interface SupplierInvitation {
+  id: string;
+  supplierId: string;
+  invitedBy?: string;
+  email: string;
+  fullName?: string;
+  phone?: string;
+  role: TeamRole;
+  token: string;
+  status: InvitationStatus;
+  expiresAt: string;
+  acceptedAt?: string;
+  createdAt: string;
+  // Joined
+  invitedByName?: string;
+  supplierName?: string;
+}
+
+export interface ActivityLog {
+  id: string;
+  supplierId: string;
+  userId?: string;
+  action: string;
+  entityType?: string;
+  entityId?: string;
+  details?: Record<string, unknown>;
+  createdAt: string;
+  // Joined
+  userName?: string;
+}
+
+export interface CreateInvitationPayload {
+  supplierId: string;
+  invitedBy: string;
+  email: string;
+  fullName?: string;
+  phone?: string;
+  role: Exclude<TeamRole, 'owner'>;
 }

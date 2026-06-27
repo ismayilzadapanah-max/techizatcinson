@@ -353,6 +353,77 @@ export const CATEGORIES: CategoryItem[] = [
   },
 ];
 
+// ─── Team Roles ───────────────────────────────────────────────
+export const TEAM_ROLES: Record<string, {
+  label: string;
+  description: string;
+  color: string;
+  permissions: string[];
+}> = {
+  owner: {
+    label: 'Sahib',
+    description: 'Bütün əməliyyatlara tam icazə',
+    color: 'bg-purple-100 text-purple-800 border-purple-200',
+    permissions: ['all'],
+  },
+  manager: {
+    label: 'Menecer',
+    description: 'Məhsul, stok, sifariş və komanda idarəsi',
+    color: 'bg-blue-100 text-blue-800 border-blue-200',
+    permissions: ['products', 'stock', 'orders', 'team', 'view'],
+  },
+  orders_manager: {
+    label: 'Sifariş meneceri',
+    description: 'Sifarişləri görmək və status yeniləmək',
+    color: 'bg-amber-100 text-amber-800 border-amber-200',
+    permissions: ['orders', 'view'],
+  },
+  stock_manager: {
+    label: 'Stok meneceri',
+    description: 'Stok məlumatlarını yeniləmək',
+    color: 'bg-orange-100 text-orange-800 border-orange-200',
+    permissions: ['stock', 'view'],
+  },
+  product_manager: {
+    label: 'Məhsul meneceri',
+    description: 'Məhsul əlavə/redaktə/deaktiv etmə',
+    color: 'bg-green-100 text-green-800 border-green-200',
+    permissions: ['products', 'view'],
+  },
+  finance_manager: {
+    label: 'Maliyyə meneceri',
+    description: 'Invoice, ödəniş və qəbz bölmələrinə baxış',
+    color: 'bg-teal-100 text-teal-800 border-teal-200',
+    permissions: ['finance', 'view'],
+  },
+  viewer: {
+    label: 'İzləyici',
+    description: 'Yalnız baxış icazəsi',
+    color: 'bg-gray-100 text-gray-800 border-gray-200',
+    permissions: ['view'],
+  },
+};
+
+export const INVITABLE_ROLES = [
+  'manager', 'orders_manager', 'stock_manager',
+  'product_manager', 'finance_manager', 'viewer',
+] as const;
+
+export const ACTIVITY_LABELS: Record<string, string> = {
+  'məhsul_əlavə_edildi':        'Məhsul əlavə edildi',
+  'məhsul_silindi':             'Məhsul silindi',
+  'məhsul_yeniləndi':           'Məhsul yeniləndi',
+  'stok_yeniləndi':             'Stok yeniləndi',
+  'sifariş_statusu_dəyişdirildi': 'Sifariş statusu dəyişdirildi',
+  'işçi_dəvət_edildi':          'İşçi dəvət edildi',
+  'işçi_deaktiv_edildi':        'İşçi deaktiv edildi',
+  'işçi_aktivləşdirildi':       'İşçi aktivləşdirildi',
+  'işçi_silindi':               'İşçi silindi',
+  'rol_dəyişdirildi':           'Rol dəyişdirildi',
+  'dəvət_ləğv_edildi':          'Dəvət ləğv edildi',
+  'işçi_dəvəti_qəbul_edildi':   'Dəvəti qəbul etdi',
+};
+
 // Rəng palitrası (referans üçün)
 export const COLORS = {
   brandDark: '#0B0E3B',

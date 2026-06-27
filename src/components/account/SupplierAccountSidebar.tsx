@@ -7,6 +7,7 @@ import { SITE } from "@/lib/constants";
 const MENU_ITEMS = [
   { label: "İcmal", href: "/account/supplier", icon: "dashboard" },
   { label: "Profilim", href: "/account/supplier/profile", icon: "business" },
+  { label: "Komanda", href: "/account/supplier/team", icon: "group" },
   { label: "Gələn sifarişlər", href: "/account/supplier/orders", icon: "inbox" },
   { label: "Məhsullarım", href: "/account/supplier/products", icon: "inventory_2" },
   { label: "Yeni məhsul əlavə et", href: "/account/supplier/products/create", icon: "add_circle" },

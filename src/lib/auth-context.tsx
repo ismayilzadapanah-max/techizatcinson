@@ -150,6 +150,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           review_count: 0,
           product_count: 0,
         });
+        // Auto-add new supplier as team owner
+        await client.from("supplier_team_members").insert({
+          supplier_id: data.user.id,
+          user_id: data.user.id,
+          role: "owner",
+          invited_by: data.user.id,
+          is_active: true,
+        });
       } else if (role === "restaurant") {
         await client.from("restaurant_profiles").insert({
           id: data.user.id,
