@@ -43,8 +43,8 @@ export default function AdminCreateUserPage() {
 
     startTransition(async () => {
       const result = await createUserByAdmin(formData);
-      if (result.error) {
-        setError(result.error);
+      if (!result.success) {
+        setError(result.message);
       } else {
         setSuccess(true);
         setTimeout(() => router.push("/admin/users"), 1800);

@@ -1,129 +1,160 @@
 "use server";
 
-import { supabaseAdmin } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { supabaseAdmin } from "@/lib/supabase/admin";
+import { requireAdmin } from "@/lib/auth/require-admin";
 
-export async function createUserByAdmin(
-  formData: FormData
-): Promise<{ error?: string; success?: boolean }> {
-  // Admin yoxlaması — server tərəfdə session-dan
-  const supabase = await createClient();
-  const {
-    data: { user: currentUser },
-  } = await supabase.auth.getUser();
+type UserRole = "admin" | "supplier" | "restaurant";
 
-  if (!currentUser) return { error: "Giriş tələb olunur" };
-  if (currentUser.user_metadata?.role !== "admin") {
-    return { error: "Bu əməliyyat yalnız adminlər üçündür" };
-  }
+export async function createUserByAdmin(formData: FormData) {
+  try {
+    await requireAdmin();
 
-  // Form məlumatları
-  const email = (formData.get("email") as string)?.trim();
-  const password = formData.get("password") as string;
-  const role = formData.get("role") as string;
-  const fullName = (formData.get("fullName") as string)?.trim() || "";
-  const phone = (formData.get("phone") as string)?.trim() || null;
-  const companyName = (formData.get("companyName") as string)?.trim() || "";
-  const restaurantName =
-    (formData.get("restaurantName") as string)?.trim() || "";
+    const email = String(formData.get("email") || "").trim();
+    const password = String(formData.get("password") || "").trim();
+    const role = String(formData.get("role") || "").trim() as UserRole;
 
-  if (!email || !password || !role) {
-    return { error: "E-mail, şifrə və rol tələb olunur" };
-  }
+    const fullName = String(formData.get("fullName") || "").trim();
+    const phone = String(formData.get("phone") || "").trim();
+    const companyName = String(formData.get("companyName") || "").trim();
+    const restaurantName = String(formData.get("restaurantName") || "").trim();
 
-  if (password.length < 6) {
-    return { error: "Şifrə minimum 6 simvol olmalıdır" };
-  }
+    if (!email || !password || !role) {
+      return {
+        success: false,
+        message: "E-mail, şifrə və rol mütləq doldurulmalıdır.",
+      };
+    }
 
-  // Supabase Auth-da user yarat — şifrə YALNIZ burada saxlanır
-  const { data: authData, error: authError } =
-    await supabaseAdmin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: {
-        full_name: fullName,
-        phone: phone || "",
+    if (!["admin", "supplier", "restaurant"].includes(role)) {
+      return {
+        success: false,
+        message: "Rol düzgün deyil.",
+      };
+    }
+
+    const { data: authData, error: authError } =
+      await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: {
+          role,
+          full_name: fullName,
+          phone,
+          company_name: companyName,
+          restaurant_name: restaurantName,
+        },
+      });
+
+    if (authError) {
+      return {
+        success: false,
+        message: authError.message,
+      };
+    }
+
+    const user = authData.user;
+
+    if (!user) {
+      return {
+        success: false,
+        message: "Auth istifadəçi yaradılmadı.",
+      };
+    }
+
+    const { error: profileError } = await supabaseAdmin
+      .from("profiles")
+      .upsert({
+        id: user.id,
         role,
-      },
-    });
-
-  if (authError || !authData.user) {
-    return { error: authError?.message || "İstifadəçi yaradıla bilmədi" };
-  }
-
-  const userId = authData.user.id;
-
-  // profiles table-a yaz
-  const { error: profileError } = await supabaseAdmin.from("profiles").upsert({
-    id: userId,
-    role,
-    full_name: fullName,
-    email,
-    phone,
-    is_active: true,
-  });
-
-  if (profileError) {
-    await supabaseAdmin.auth.admin.deleteUser(userId);
-    return { error: `Profil xətası: ${profileError.message}` };
-  }
-
-  // Supplier üçün əlavə cədvəllər
-  if (role === "supplier") {
-    const { error: supplierError } = await supabaseAdmin
-      .from("supplier_profiles")
-      .insert({
-        id: userId,
-        user_id: userId,
-        company_name: companyName,
-        contact_person: fullName,
+        full_name: fullName,
         email,
-        phone: phone || "",
-        approval_status: "approved",
-        rating: 0,
-        review_count: 0,
-        product_count: 0,
+        phone,
+        is_active: true,
       });
 
-    if (supplierError) {
+    if (profileError) {
       return {
-        error: `Təchizatçı profili xətası: ${supplierError.message}`,
+        success: false,
+        message: profileError.message,
       };
     }
 
-    // Supplier sahibi olaraq team member əlavə et
-    await supabaseAdmin.from("supplier_team_members").insert({
-      supplier_id: userId,
-      user_id: userId,
-      role: "owner",
-      invited_by: userId,
-      is_active: true,
-    });
-  }
+    if (role === "supplier") {
+      const { data: supplierProfile, error: supplierError } =
+        await supabaseAdmin
+          .from("supplier_profiles")
+          .upsert({
+            user_id: user.id,
+            company_name: companyName || fullName,
+            contact_person: fullName,
+            phone,
+            email,
+            is_active: true,
+          })
+          .select("id")
+          .single();
 
-  // Restaurant üçün əlavə cədvəl
-  if (role === "restaurant") {
-    const { error: restaurantError } = await supabaseAdmin
-      .from("restaurant_profiles")
-      .insert({
-        id: userId,
-        user_id: userId,
-        restaurant_name: restaurantName,
-        contact_person: fullName,
-        email,
-        phone: phone || "",
-        approval_status: "approved",
-      });
+      if (supplierError) {
+        return {
+          success: false,
+          message: supplierError.message,
+        };
+      }
 
-    if (restaurantError) {
-      return {
-        error: `Restoran profili xətası: ${restaurantError.message}`,
-      };
+      if (supplierProfile?.id) {
+        const { error: teamError } = await supabaseAdmin
+          .from("supplier_team_members")
+          .upsert({
+            supplier_id: supplierProfile.id,
+            user_id: user.id,
+            member_role: "owner",
+            status: "active",
+          });
+
+        if (teamError) {
+          return {
+            success: false,
+            message: teamError.message,
+          };
+        }
+      }
     }
-  }
 
-  revalidatePath("/admin/users");
-  return { success: true };
+    if (role === "restaurant") {
+      const { error: restaurantError } = await supabaseAdmin
+        .from("restaurant_profiles")
+        .upsert({
+          user_id: user.id,
+          restaurant_name: restaurantName || fullName,
+          contact_person: fullName,
+          phone,
+          email,
+          is_active: true,
+        });
+
+      if (restaurantError) {
+        return {
+          success: false,
+          message: restaurantError.message,
+        };
+      }
+    }
+
+    revalidatePath("/admin/users");
+
+    return {
+      success: true,
+      message: "İstifadəçi uğurla yaradıldı.",
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Server xətası baş verdi.",
+    };
+  }
 }
