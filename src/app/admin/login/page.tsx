@@ -68,7 +68,7 @@ export default function AdminLoginPage() {
         {/* Auth Card */}
         <div className="glass-card rounded-xl p-8 shadow-2xl border border-[#E9E8EE]/20">
           <div className="mb-8">
-            <h2 className="text-xl font-bold text-on-background mb-1">Admin Paneline Daxol</h2>
+            <h2 className="text-xl font-bold text-on-background mb-1">Admin Panelinə Daxil Ol</h2>
             <p className="text-xs text-on-surface-variant">Admin kredensialları ilə giriş edin</p>
           </div>
 
@@ -99,7 +99,7 @@ export default function AdminLoginPage() {
               </div>
             )}
             <button type="submit" disabled={loading} className="w-full py-3 bg-[#D47092] text-white rounded-lg font-semibold text-sm hover:bg-[#c25878] transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
-              {loading ? "Gözləyin..." : "Admin Paneline Daxol"}
+              {loading ? "Gözləyin..." : "Admin Panelinə Daxil Ol"}
               <span className="material-symbols-outlined text-[18px]">{loading ? "sync" : "login"}</span>
             </button>
           </form>
