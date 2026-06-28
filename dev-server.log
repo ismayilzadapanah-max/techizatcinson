@@ -2,18 +2,57 @@
 > techizatcin@0.1.0 dev
 > next dev
 
-⚠ Port 3000 is in use by process 412, using available port 3001 instead.
 ▲ Next.js 16.2.9 (Turbopack)
-- Local:         http://localhost:3001
-- Network:       http://100.71.100.27:3001
+- Local:         http://localhost:3000
+- Network:       http://100.71.100.27:3000
 - Environments: .env.local
-✓ Ready in 3.0s
-⨯ Another next dev server is already running.
+✓ Ready in 4.2s
+- Experiments (use with caution):
+  · optimizePackageImports
 
-- Local:        http://localhost:3000
-- PID:          412
-- Dir:          C:\Users\USER\Desktop\tECHIZATCIN VEB SAYT
-- Log:          .next\dev\logs\next-development.log
-
-Run taskkill /PID 412 /F to stop it.
-[?25h
+ GET /admin/login 200 in 1237ms (next.js: 623ms, proxy.ts: 291ms, application-code: 323ms)
+ GET / 200 in 116ms (next.js: 34ms, proxy.ts: 7ms, application-code: 74ms)
+ GET /admin/login 200 in 59ms (next.js: 3ms, proxy.ts: 5ms, application-code: 51ms)
+ GET /admin 200 in 429ms (next.js: 28ms, proxy.ts: 379ms, application-code: 22ms)
+ GET /admin/users/create 200 in 475ms (next.js: 75ms, proxy.ts: 335ms, application-code: 65ms)
+ POST /admin/users/create 200 in 1522ms (next.js: 5ms, proxy.ts: 326ms, application-code: 1191ms)
+  └─ ƒ createUserByAdmin({}) in 1136ms src/app/admin/users/create/actions.ts
+ GET /admin/users 200 in 392ms (next.js: 41ms, proxy.ts: 334ms, application-code: 17ms)
+ GET /admin/users/create 200 in 386ms (next.js: 4ms, proxy.ts: 341ms, application-code: 41ms)
+[createUserByAdmin] Supplier profil xətası: {
+  code: '23505',
+  details: 'Key (user_id)=(55c7dcd6-509e-438e-91f7-9f4c5ad099c0) already exists.',
+  hint: null,
+  message: 'duplicate key value violates unique constraint "supplier_profiles_user_id_unique"'
+}
+ POST /admin/users/create 200 in 1790ms (next.js: 3ms, proxy.ts: 337ms, application-code: 1449ms)
+  └─ ƒ createUserByAdmin({}) in 1442ms src/app/admin/users/create/actions.ts
+ GET /admin/users/create 200 in 402ms (next.js: 5ms, proxy.ts: 335ms, application-code: 63ms)
+[createUserByAdmin] Restaurant profil xətası: {
+  code: '23505',
+  details: 'Key (user_id)=(ad90f0aa-9d8f-4d08-9509-7861639d8a09) already exists.',
+  hint: null,
+  message: 'duplicate key value violates unique constraint "restaurant_profiles_user_id_key"'
+}
+ POST /admin/users/create 200 in 1744ms (next.js: 3ms, proxy.ts: 331ms, application-code: 1410ms)
+  └─ ƒ createUserByAdmin({}) in 1403ms src/app/admin/users/create/actions.ts
+✓ Compiled in 152ms
+ GET /admin/login 200 in 394ms (next.js: 216ms, proxy.ts: 9ms, application-code: 170ms)
+ GET /admin/login 200 in 168ms (next.js: 6ms, proxy.ts: 87ms, application-code: 75ms)
+ GET /admin/login 200 in 56ms (next.js: 31ms, proxy.ts: 7ms, application-code: 19ms)
+ GET /admin/login 200 in 57ms (next.js: 8ms, proxy.ts: 6ms, application-code: 44ms)
+ GET /admin/login 200 in 171ms (next.js: 4ms, proxy.ts: 4ms, application-code: 162ms)
+ GET /admin 200 in 411ms (next.js: 11ms, proxy.ts: 381ms, application-code: 19ms)
+ GET /admin/users/create 200 in 569ms (next.js: 88ms, proxy.ts: 326ms, application-code: 155ms)
+ POST /admin/users/create 200 in 1654ms (next.js: 5ms, proxy.ts: 340ms, application-code: 1309ms)
+  └─ ƒ createUserByAdmin({}) in 1279ms src/app/admin/users/create/actions.ts
+ GET /admin/users 200 in 359ms (next.js: 8ms, proxy.ts: 336ms, application-code: 16ms)
+ GET /admin/users/create 200 in 383ms (next.js: 4ms, proxy.ts: 337ms, application-code: 42ms)
+ POST /admin/users/create 200 in 2.7s (next.js: 4ms, proxy.ts: 342ms, application-code: 2.3s)
+  └─ ƒ createUserByAdmin({}) in 2292ms src/app/admin/users/create/actions.ts
+ GET /admin/users 200 in 366ms (next.js: 4ms, proxy.ts: 340ms, application-code: 23ms)
+ GET /admin/users/create 200 in 361ms (next.js: 3ms, proxy.ts: 318ms, application-code: 39ms)
+ POST /admin/users/create 200 in 1596ms (next.js: 5ms, proxy.ts: 322ms, application-code: 1269ms)
+  └─ ƒ createUserByAdmin({}) in 1239ms src/app/admin/users/create/actions.ts
+ GET /admin/users 200 in 354ms (next.js: 3ms, proxy.ts: 333ms, application-code: 19ms)
+ GET /admin/login 200 in 52ms (next.js: 3ms, proxy.ts: 4ms, application-code: 44ms)

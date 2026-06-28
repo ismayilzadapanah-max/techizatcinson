@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
 interface UserRow {
@@ -129,13 +128,6 @@ export default function AdminUsersPage() {
             {loading ? "Yüklənir..." : `${users.length} istifadəçi`}
           </p>
         </div>
-        <Link
-          href="/admin/users/create"
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#141647] text-white text-sm font-semibold rounded-lg hover:bg-[#243786] transition-colors"
-        >
-          <span className="material-symbols-outlined text-[18px]">person_add</span>
-          Yeni istifadəçi yarat
-        </Link>
       </div>
 
       {/* Filterlər */}
@@ -189,13 +181,6 @@ export default function AdminUsersPage() {
               person_search
             </span>
             <p className="text-[#5D608B] text-sm">İstifadəçi tapılmadı</p>
-            <Link
-              href="/admin/users/create"
-              className="inline-flex items-center gap-1.5 mt-4 text-sm text-[#243786] hover:underline"
-            >
-              <span className="material-symbols-outlined text-[16px]">add</span>
-              İlk istifadəçini yarat
-            </Link>
           </div>
         ) : (
           <div className="overflow-x-auto">
